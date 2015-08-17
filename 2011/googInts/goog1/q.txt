@@ -1,0 +1,6 @@
+
+1. Building a balanced binary tree given a sorted array 
+
+2. Return nth element of greyCode for k bits
+
+3. Returns PowerSet given a set

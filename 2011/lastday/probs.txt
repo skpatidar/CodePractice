@@ -1,0 +1,9 @@
+
+Byer-Moore
+Longest Common Subsequence
+Longest increasing Subsequence
+
+Kruskal's - MST : Pick least weighted edge and add to forest if it merges 2 sub-forests
+Prim's - MST : Greedy approach : Start with a random vertex and add least weighted edge - repeat with all vertex in the Forest
+
+Depth/Breadth First Search

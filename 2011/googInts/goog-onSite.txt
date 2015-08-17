@@ -1,0 +1,13 @@
+
+
+- Pretty Print a tree : code
+- Find similar sets from a million sets : just algo
+
+
+- Given a binary tree's root node and a leaf node to be the new root node,
+return the new tree
+- Find minimum length substring of given chars in the given string
+
+
+- write a function to draw a line from (x1,y) to (x2,y) on the screen using C : bit manipulations etc in the buffer -preserving the buffer
+- algorithm to come up with all sets of strings represented by open and close bracket : such that the brackets are balanced
