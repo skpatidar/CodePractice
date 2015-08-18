@@ -5,12 +5,13 @@
     * Print level order / pretty Print Tree
     * Print all paths in the tree 
     * Tree to Doubly Linked List - Recursion
+    * Left view of a tree [Level order traversal]
  
  * Linked List Class - Frequent Operations
     * Reverse / getNth / insertNth / deleteList 
     * sortlist (mergeSort) / frontBackSplit / alternateSplit 
  
- * Sorting Algos 
+ * Sorting Algos
     * Quick Sort v/s Merge Sort
     
 **/
@@ -23,6 +24,8 @@
 #include<math.h>
 
 using namespace std;
+typedef vector<int> vI;
+typedef vector<int>::iterator vIter;
 
 void printArray(vector<int> A) {
     for (vector<int>::iterator iter=A.begin(); iter != A.end(); ) {
@@ -36,6 +39,7 @@ void printArray(vector<int> A) {
 }
 
 void generateRandomArray(vector<int> &A, int n) {
+    A.clear();
     for (int i=0; i < n; i++) {
         A.push_back(rand()%1024);
     }
@@ -64,6 +68,46 @@ void quickSort(vector<int> &A, int lo, int hi) {
 
 void qSort(vector<int> &A) {
     quickSort(A, 0, (A.size()-1));
+}
+
+vector<int> mergeSortedArrays(vector<int> A, vector<int> B) {
+    vI sorted;
+    vIter one, two;
+    for (one = A.begin(), two = B.begin(); one != A.end() && two != B.end(); ){
+        if (*one < *two) {
+            sorted.push_back(*one);
+            one++;
+        } else {
+            sorted.push_back(*two);
+            two++;
+        }
+    }
+    while(one != A.end()) {
+        sorted.push_back(*one);
+        one++;
+    }
+    while(two != B.end()) {
+        sorted.push_back(*two);
+        two++;
+    }
+    return sorted;
+}
+
+vector<int> mergeSort(vector<int> A, int low, int high) {
+    if (high <= low) {
+        vector<int> retArray;
+        if (low == high) { 
+            retArray.push_back(A[low]);
+        } 
+        return retArray; 
+    }
+    
+    int mid = (high + low)/2 + 1;
+    
+    vector<int> one = mergeSort(A, low, mid-1);
+    vector<int> two = mergeSort(A, mid, high);
+    vector<int> sorted = mergeSortedArrays(one, two);
+    return sorted;
 }
 
 struct treeNode {
@@ -238,6 +282,7 @@ treeNode* addNode(treeNode* root, int d, bool isRight) {
     else root->left = newleaf;
     return newleaf;
 }
+
 treeNode* insert(treeNode* root, int d) {
     if (root == NULL) return NULL;
     if (root->data == d) return NULL; 
@@ -353,7 +398,7 @@ void printDLL(treeNode* head) {
 }
 
 void printLinkList(linkNode* head) {
-    cout << "\nList : ";
+    cout << "List : ";
     linkNode *node = head;
     while(node != NULL) {
         cout << node->data << "-->";
@@ -380,6 +425,7 @@ linkNode* getLastNode(linkNode* head) {
 }
 
 linkNode* reverseLinkList(linkNode* head) {
+    if (head==NULL) return NULL;
     linkNode* newHead = getLastNode(head);
     rLinkList(head); 
     return newHead;
@@ -454,19 +500,154 @@ void deleteList(linkNode* head) {
     return;
 }
 
+void frontBackSplit(linkNode* head, linkNode* &front, linkNode* &back) {
+    if (NULL == head) {
+        front = back = head;
+        return;
+    }
+    
+    front = head;
+    back = head->next;
+    while (back != NULL) {
+        if(back->next != NULL) {
+            front = front->next;
+            back = back->next->next;
+        } else {
+            back = back->next;
+        }
+    }
+    back = front->next;
+    front->next = NULL;
+    front = head;
+}
+
+void oddEvenSplit(linkNode* head, linkNode* &odd, linkNode* &even) {
+    if (head == NULL) {
+        odd = even = head;
+        return;
+    }
+    
+    // Init odd/even 
+    odd = head;
+    even = head->next;
+    
+    // Last node for odd / even lists
+    linkNode* oddTail = odd;
+    linkNode* evenTail = even;
+    
+    // Next pair of odd/even to be connected to the list
+    linkNode* nextPair = NULL;
+    
+    if (even == NULL) {
+        return;
+    }
+    
+    nextPair = even->next;
+    oddTail->next = NULL;
+    evenTail->next = NULL;
+    
+    while(nextPair != NULL) {
+        oddTail->next = nextPair;
+        evenTail->next = nextPair->next;
+        oddTail = oddTail->next;
+        evenTail = evenTail->next;
+        
+        //update nextPair 
+        nextPair = nextPair->next;
+        if (nextPair != NULL) nextPair = nextPair->next;
+        
+        // now update odd/even last nodes to point to NULL 
+        oddTail->next = NULL;
+        if (evenTail != NULL) {
+            evenTail->next = NULL; 
+        }
+    }
+}
+
+void mergeSortedLists(linkNode* &head, linkNode* l1, linkNode* l2) {
+    if (l1 == NULL) {
+        head = l2; 
+        return;
+    } 
+    if (l2 == NULL) {
+        head = l1;
+    }
+    
+    if (l1->data < l2->data) {
+        head = l1;
+        l1 = l1->next;
+    } else {
+        head = l2;
+        l2 = l2->next;
+    }
+    linkNode* currNode = head;
+    while(l1 != NULL && l2 != NULL) {
+        if (l1->data < l2->data) {
+            currNode->next = l1; 
+            l1 = l1->next;
+        } else {
+            currNode->next = l2;
+            l2 = l2->next;
+        }
+        currNode = currNode->next;
+    }
+    
+    if (l1 != NULL) {
+        currNode->next = l1;
+    } else if (l2 != NULL) {
+        currNode->next = l2;
+    }
+    
+}
+
+linkNode* mergeSortLists(linkNode* list) {
+    // Base case 
+    if (list == NULL) return list;
+    if (list->next == NULL) return list;
+    
+    // Break the list 
+    linkNode *front, *back;
+    frontBackSplit(list, front, back);
+    
+    // Merge Sort recursive 
+    front = mergeSortLists(front);
+    back = mergeSortLists(back);
+    
+    // Merge sorted lists
+    mergeSortedLists(list, front, back);
+    
+    return list;
+}
+
 int main() {
     int n; 
     cout << "Enter # of elements in the array : ";
     cin >> n;
     
     vector<int> A;
-    cout << "Initial array : ";
-    generateRandomArray(A, n);
-    printArray(A);
-    qSort(A); 
-    cout << "Sorted array : ";
-    printArray(A);
     
+    cout << "Initial array : "; generateRandomArray(A, n); printArray(A);
+    //qSort(A); cout << "Sorted array : "; printArray(A);
+    vector<int> B = mergeSort(A, 0, A.size()-1); cout << "Sorted array : "; printArray(B);
+    
+    //linkNode *list1 = buildLinkList(A);
+    
+    //cout << "Initial array : "; generateRandomArray(A, n+1); printArray(A);
+    //qSort(A); cout << "Sorted array : "; printArray(A);
+    //linkNode *list2 = buildLinkList(A);
+
+    /*
+    linkNode *sortedList; 
+    sortedList = mergeSortLists(list1);
+    cout << "[Sorted]"; printLinkList(sortedList);
+    */
+    
+    /*
+    mergeSortedLists(sortedList, list1, list2); 
+    cout << "Merged sorted list : "; printLinkList(sortedList);
+    */
+
+/* 
     treeNode *root = buildBST(A, 0, A.size()-1);
     cout << "\nPrint tree pre-order\n"; printTreePreOrder(root);
     cout << "\nPrint tree in-order\n"; printTreeInOrder(root);
@@ -476,8 +657,7 @@ int main() {
     
     treeNode *dllHead = convertToDLL(root);
     cout << "\nPrint DLL from Tree \n"; printDLL(dllHead);
-      
-/*
+    
     treeNode* temp;
     temp = insert(root, 212);
     cout <<"\nInsert 212 : \n"; printLevelOrderTree(root);
@@ -509,8 +689,8 @@ int main() {
     cout <<"\nReversed tree by leafNode : 512 : \n"; printLevelOrderTree(root);
 */
 
-    linkNode *head = buildLinkList(A);
-    
+ 
+/* 
     head = reverseLinkList(head);
     cout << "Reversed Link List : "; printLinkList(head);
     
@@ -519,9 +699,16 @@ int main() {
     
     head = insertNth(head, 2, 22);
     cout << "Insert 22 @ 2 : "; printLinkList(head);
-
     cout << "Get @ 2 : " << getNth(head, 2) << "\n";
     
-    cout << "Delete List\n"; deleteList(head);
+    linkNode *front, *back;
+    //frontBackSplit(head, front, back);
+    oddEvenSplit(head, front, back);
+    cout << "\nFront List : "; printLinkList(front);
+    cout << "\nBack List : "; printLinkList(back);
+    cout << "\nDelete List : "; deleteList(front);
+    cout << "\nDelete List : "; deleteList(back);    
+*/    
+   
     
 }
