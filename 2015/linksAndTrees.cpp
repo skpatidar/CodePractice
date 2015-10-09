@@ -16,99 +16,7 @@
     
 **/
 
-#include<iostream>
-#include<vector>
-#include<stdlib.h>
-#include<iomanip>
-#include<deque>
-#include<math.h>
-
-using namespace std;
-typedef vector<int> vI;
-typedef vector<int>::iterator vIter;
-
-void printArray(vector<int> A) {
-    for (vector<int>::iterator iter=A.begin(); iter != A.end(); ) {
-        cout << *iter;
-        iter++;
-        if (iter != A.end()) 
-            cout << ", ";
-        else 
-            cout << "\n";
-    }
-}
-
-void generateRandomArray(vector<int> &A, int n) {
-    A.clear();
-    for (int i=0; i < n; i++) {
-        A.push_back(rand()%1024);
-    }
-}
-
-void swap(vector<int> &A, int i, int j) {
-    int temp = A[i];
-    A[i] = A[j];
-    A[j] = temp;
-}
-
-void quickSort(vector<int> &A, int lo, int hi) {
-    if (hi < lo) return;
-    
-    int pivot = lo, swapIndex = lo+1;
-    for (int i=lo+1; i <= hi; i++) {
-        if (A[i] < A[pivot]) {
-            swap(A, i, swapIndex);
-            swapIndex++;
-        }
-    }
-    swap(A, pivot, swapIndex-1);
-    quickSort(A, lo, swapIndex - 2);
-    quickSort(A, swapIndex, hi);
-}
-
-void qSort(vector<int> &A) {
-    quickSort(A, 0, (A.size()-1));
-}
-
-vector<int> mergeSortedArrays(vector<int> A, vector<int> B) {
-    vI sorted;
-    vIter one, two;
-    for (one = A.begin(), two = B.begin(); one != A.end() && two != B.end(); ){
-        if (*one < *two) {
-            sorted.push_back(*one);
-            one++;
-        } else {
-            sorted.push_back(*two);
-            two++;
-        }
-    }
-    while(one != A.end()) {
-        sorted.push_back(*one);
-        one++;
-    }
-    while(two != B.end()) {
-        sorted.push_back(*two);
-        two++;
-    }
-    return sorted;
-}
-
-vector<int> mergeSort(vector<int> A, int low, int high) {
-    if (high <= low) {
-        vector<int> retArray;
-        if (low == high) { 
-            retArray.push_back(A[low]);
-        } 
-        return retArray; 
-    }
-    
-    int mid = (high + low)/2 + 1;
-    
-    vector<int> one = mergeSort(A, low, mid-1);
-    vector<int> two = mergeSort(A, mid, high);
-    vector<int> sorted = mergeSortedArrays(one, two);
-    return sorted;
-}
+#include "utility.h"
 
 struct treeNode {
     int data;
@@ -619,10 +527,136 @@ linkNode* mergeSortLists(linkNode* list) {
     return list;
 }
 
+int findSecondSmallest(treeNode *root) {
+    if (root == NULL) return -1;
+    
+    if (root->left != NULL) {
+        if (root->left->left != NULL or root->left->right != NULL) {
+            return findSecondSmallest(root->left);
+        } else {
+            return root->data;
+        }
+    } else if (root->right != NULL)  {
+        if (root->right->left == NULL && root->right->right == NULL) {
+            return root->right->data;
+        } else {
+            return findSecondSmallest(root->right);
+        }
+    }
+    return -1;
+}
+
+void printPathReverse(treeNode *root, int a) {
+    if (root == NULL) {
+        cout << "[X]";
+    }
+    
+    if (root->data == a) {
+        cout << "[" << root->data << "]-->";
+        return;
+    }
+    if (root->data > a) {
+        printPathReverse(root->left, a);
+    } else {
+        printPathReverse(root->right, a);
+    }
+    cout << "[" << root->data << "]-->";
+}
+
+void printPathForward(treeNode *root, int a) {
+    if (root == NULL) {
+        cout << "[X]";
+    }
+    
+    if (root->data == a) {
+        cout << "[" << root->data << "]\n";
+        return;
+    }
+    cout << "[" << root->data << "]-->";
+    if (root->data > a) {
+        printPathForward(root->left, a);
+    } else {
+        printPathForward(root->right, a);
+    }
+}
+
+void path2Nodes(treeNode *root, int a, int b) {
+    if (root == NULL) {
+        cout << "Given 2 nodes do not exist\n";
+        return;
+    }
+    
+    if (root->data > a && root->data > b) {
+        root = root->left;
+        path2Nodes(root, a, b);
+    } else if (root->data < a && root->data < b) {
+        root = root->right;
+        path2Nodes(root, a, b);
+    } else {
+        if (a <= root->data) {
+            if (a == root->data) 
+                cout << "[" << a << "]-->";
+            else
+                printPathReverse(root->left, a);
+            
+            if (b == root->data)
+                cout << "[" << b << "]-->";
+            else {
+                if (a != root->data) 
+                    cout << "[" << root->data << "]-->";
+                printPathForward(root->right, b);
+            }
+        } else {
+            if (b == root->data) 
+                cout << "[" << b << "]-->";
+            else
+                printPathReverse(root->left, b);
+            
+            if (a == root->data)
+                cout << "[" << a << "]-->";
+            else {
+                if (b != root->data) 
+                    cout << "[" << root->data << "]-->";
+                printPathForward(root->right, a);
+            }
+        }
+    }        
+}
+
+int findMin(treeNode *root) {
+    if (root == NULL) return 99999999;
+    int rightMin = findMin(root->right);
+    int leftMin = findMin(root->left);
+    int data = root->data;
+    if (0 && data == 585) 
+        data = 688;
+    return min( min(rightMin, leftMin), data);
+}
+
+int findMax(treeNode *root) {
+    if (root == NULL) return -99999999;
+    int rightMax = findMax(root->right);
+    int leftMax = findMax(root->left);
+    int data = root->data;
+    if (0 && data == 585) 
+        data = 688;
+    return max( max(rightMax, leftMax), data);
+}
+
+bool isValidBinaryTree(treeNode *root) {
+    if (root == NULL) return true;
+    int rightMin = findMin(root->right);
+    int leftMax = findMax(root->left);
+    if (rightMin < root->data || leftMax > root->data) return false;
+    return (isValidBinaryTree(root->right) && isValidBinaryTree(root->left)); 
+}
+
 int main() {
     int n; 
     cout << "Enter # of elements in the array : ";
     cin >> n;
+    
+    //srand(time(NULL));
     
     vector<int> A;
     
@@ -647,16 +681,18 @@ int main() {
     cout << "Merged sorted list : "; printLinkList(sortedList);
     */
 
-/* 
-    treeNode *root = buildBST(A, 0, A.size()-1);
+
+    treeNode *root = buildBST(B, 0, B.size()-1);
     cout << "\nPrint tree pre-order\n"; printTreePreOrder(root);
     cout << "\nPrint tree in-order\n"; printTreeInOrder(root);
     cout << "\nPrint tree post-order\n"; printTreePostOrder(root);
 
     cout <<"\nPrint level order tree : \n"; printLevelOrderTree(root);
     
+    /*
     treeNode *dllHead = convertToDLL(root);
     cout << "\nPrint DLL from Tree \n"; printDLL(dllHead);
+    */
     
     treeNode* temp;
     temp = insert(root, 212);
@@ -682,7 +718,17 @@ int main() {
     
     root = remove(root, 199);
     cout <<"\nRemove 199 : \n"; printLevelOrderTree(root);
+
+    // Second smallest in BST
+    cout << "\nFind Second Smallest : " << findSecondSmallest(root);
     
+    // Path b/w 2 nodes in BST
+    cout << "\nPath b/w 300 and 844 :\n";
+    path2Nodes(root, 214, 686);
+    
+    cout << "\nIs Valid Binary Tree : " << isValidBinaryTree(root);
+    
+/*    
     cout <<"\nPrint tree paths : \n"; printAllPaths(root);
 
     root = reverseHangTree(root, 512); 
@@ -710,5 +756,5 @@ int main() {
     cout << "\nDelete List : "; deleteList(back);    
 */    
    
-    
+    return 0;
 }
